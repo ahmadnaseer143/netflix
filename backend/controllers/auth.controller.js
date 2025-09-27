@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateToken.js";
+
 export async function signup(req, res) {
   try {
     const { email, password, username } = req.body;
@@ -72,7 +73,45 @@ export async function signup(req, res) {
 }
 
 export async function login(req, res) {
-  res.send("Login Route");
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid Credentials" });
+    }
+
+    const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid Credentials" });
+    }
+
+    generateTokenAndSetCookie(user._id, res);
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        ...user._doc,
+        password: "",
+      },
+    });
+  } catch (error) {
+    return res;
+    console
+      .log("Error in login controller", error.message)
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
 }
 
 export async function logout(req, res) {
