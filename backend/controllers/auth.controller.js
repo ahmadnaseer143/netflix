@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import { generateTokenAndSetCookie } from "../utils/generateToken.js";
 export async function signup(req, res) {
   try {
     const { email, password, username } = req.body;
@@ -49,6 +50,8 @@ export async function signup(req, res) {
       username,
       image,
     });
+
+    generateTokenAndSetCookie(newUser._id, res);
     await newUser.save();
 
     //remove password from the response
