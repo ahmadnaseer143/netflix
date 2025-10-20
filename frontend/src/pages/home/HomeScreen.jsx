@@ -8,6 +8,7 @@ import {
   TV_CATEGORIES,
 } from "../../utils/constants";
 import { useContentStore } from "../../store/content";
+import MovieSlider from "../../components/MovieSlider";
 import { useState } from "react";
 
 const HomeScreen = () => {
@@ -89,6 +90,16 @@ const HomeScreen = () => {
             </Link>
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-10 bg-black py-10">
+        {contentType === "movie"
+          ? MOVIE_CATEGORIES.map((category) => (
+              <MovieSlider key={category} category={category} />
+            ))
+          : TV_CATEGORIES.map((category) => (
+              <MovieSlider key={category} category={category} />
+            ))}
       </div>
     </>
   );
