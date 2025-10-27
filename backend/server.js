@@ -27,7 +27,8 @@ app.use("/api/v1/search", protectRoute, searchRoutes);
 if (ENV_VARS.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
-  app.get("*", (req, res) => {
+  // Catch all unmatched routes and serve React index.html
+  app.use((req, res) => {
     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
   });
 }
