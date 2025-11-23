@@ -4,7 +4,7 @@ import axios from "axios";
 const router = express.Router();
 
 // FastAPI URL
-const PY_API = "http://127.0.0.1:5001";
+const PY_API = process.env.PY_AI_URL;
 
 router.get("/:title", async (req, res) => {
   try {
