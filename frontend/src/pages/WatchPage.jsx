@@ -8,17 +8,20 @@ import ReactPlayer from "react-player";
 import { ORIGINAL_IMG_BASE_URL, SMALL_IMG_BASE_URL } from "../utils/constants";
 import { formatReleaseDate } from "../utils/dateFunction";
 import WatchPageSkeleton from "../components/skeletons/WatchPageSkeleton";
+import RecommendedCard from "../components/RecommendedCard";
 
 const WatchPage = () => {
   const { id } = useParams();
   const [trailers, setTrailers] = useState([]);
   const [currentTrailerIdx, setCurrentTrailerIdx] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [recommended, setRecommended] = useState([]);
   const [content, setContent] = useState({});
   const [similarContent, setSimilarContent] = useState([]);
   const { contentType } = useContentStore();
 
   const sliderRef = useRef(null);
+  const recommendedRef = useRef(null);
 
   useEffect(() => {
     const getTrailers = async () => {
@@ -36,6 +39,23 @@ const WatchPage = () => {
 
     getTrailers();
   }, [contentType, id]);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        const res = await axios.get(
+          `/api/v1/recommend/${content.title || content.name}`
+        );
+        setRecommended(res.data.recommendations);
+      } catch (err) {
+        console.log("No recommendations found");
+      }
+    };
+
+    if (content?.title || content?.name) {
+      fetchRecommendations();
+    }
+  }, [content]);
 
   useEffect(() => {
     const getSimilarContent = async () => {
@@ -88,6 +108,21 @@ const WatchPage = () => {
     if (sliderRef.current)
       sliderRef.current.scrollBy({
         left: sliderRef.current.offsetWidth,
+        behavior: "smooth",
+      });
+  };
+  const scrollRecommendedLeft = () => {
+    if (recommendedRef.current)
+      recommendedRef.current.scrollBy({
+        left: -recommendedRef.current.offsetWidth,
+        behavior: "smooth",
+      });
+  };
+
+  const scrollRecommendedRight = () => {
+    if (recommendedRef.current)
+      recommendedRef.current.scrollBy({
+        left: recommendedRef.current.offsetWidth,
         behavior: "smooth",
       });
   };
@@ -240,6 +275,37 @@ const WatchPage = () => {
 								group-hover:opacity-100 transition-all duration-300 cursor-pointer bg-red-600 
 								text-white rounded-full"
                 onClick={scrollLeft}
+              />
+            </div>
+          </div>
+        )}
+
+        {recommended.length > 0 && (
+          <div className="mt-12 max-w-5xl mx-auto relative">
+            <h3 className="text-3xl font-bold mb-4">Recommended For You</h3>
+
+            <div
+              ref={recommendedRef}
+              className="flex overflow-x-scroll scrollbar-hide gap-4 pb-4 group"
+            >
+              {recommended.map((title, index) => (
+                <RecommendedCard key={index} title={title} />
+              ))}
+
+              {/* RIGHT ARROW */}
+              <ChevronRight
+                className="absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8
+        opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer
+        bg-red-600 text-white rounded-full"
+                onClick={scrollRecommendedRight}
+              />
+
+              {/* LEFT ARROW */}
+              <ChevronLeft
+                className="absolute top-1/2 -translate-y-1/2 left-2 w-8 h-8
+        opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer
+        bg-red-600 text-white rounded-full"
+                onClick={scrollRecommendedLeft}
               />
             </div>
           </div>
